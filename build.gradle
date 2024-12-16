@@ -1,0 +1,210 @@
+buildscript {
+    repositories {
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7.38'
+    }
+}
+
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    // ShadowJar / JarInJar
+    id 'com.gradleup.shadow' version '8.3.2'
+    id 'java'
+    // SpongePowered
+    id 'org.spongepowered.mixin' version '0.7.38'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+
+    copyIdeResources = true
+
+    runs {
+        // applies to all the run configs below
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroupByRegex("software\\.bernie.*")
+            includeGroup("com.eliotlash.mclib")
+        }
+    }
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/" // Integración para el JEI, NO ES DEPENDENCIA, ES COMPATIBILIDAD.
+    }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
+configurations {
+    shade // <- Create a 'shade' configuration
+    implementation.extendsFrom(shade) // <- Add the shade configuration to implementation
+}
+
+dependencies {
+    // Minecraft + Mixin
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
+
+    //Se usa GeckoLib mediante ShadowJar
+    shade fg.deobf('software.bernie.geckolib:geckolib-forge-1.20.1:4.4.4')
+    implementation 'com.eliotlash.mclib:mclib:20'
+
+    //Corrección a puntos vulnerables de dependencias en Forge:
+    implementation 'com.google.guava:guava:33.0.0-jre'
+    implementation 'io.netty:netty-codec:4.1.100.Final'
+    implementation 'io.netty:netty-handler:4.1.100.Final'
+    implementation 'org.apache.commons:commons-compress:1.27.1'
+
+    // Just Enough Items (JEI)
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
+    // Este es solo para el runClient, no es necesario para el jar
+    runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors: mod_authors, mod_description: mod_description,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'mixins.latammod.refmap.json'
+    config 'latammod.mixins.json'
+
+    debug.verbose = true
+    debug.export = true
+}
+
+jar {
+    archiveClassifier = 'no-gecko'
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+    from(configurations.shade) {
+        into('lib')
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    finalizedBy 'reobfJar'
+}
+
+shadowJar {
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+    exclude 'software/bernie/example/**'
+    exclude 'assets/geckolib/**'
+    exclude '**/*.java'
+
+    relocate 'software.bernie.shadowed', 'com.shokkoh.latammod.relocated.software.bernie.shadowed' // <- Move the shadowed geckolib shadowed packages. This prevents classpath conflicts in runtime
+    relocate 'software.bernie.geckolib', 'com.shokkoh.latammod.relocated.software.bernie.geckolib'
+
+    finalizedBy 'reobfShadowJar'
+}
+
+assemble.dependsOn shadowJar
+
+reobf {
+    shadowJar {}
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+        shadow(MavenPublication) {
+            components.shadow
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+jar.finalizedBy('reobfShadowJar')
