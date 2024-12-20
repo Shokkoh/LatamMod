@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/latam.main.iml" filepath="$PROJECT_DIR$/.idea/modules/latam.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/latam.test.iml" filepath="$PROJECT_DIR$/.idea/modules/latam.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/latammod.main.iml" filepath="$PROJECT_DIR$/.idea/modules/latammod.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/latammod.test.iml" filepath="$PROJECT_DIR$/.idea/modules/latammod.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/llllllt.main.iml" filepath="$PROJECT_DIR$/.idea/modules/llllllt.main.iml" />
