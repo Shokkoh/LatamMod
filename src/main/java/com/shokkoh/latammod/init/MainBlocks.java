@@ -1,6 +1,7 @@
 package com.shokkoh.latammod.init;
 
 import com.shokkoh.latammod.LatamMod;
+import com.shokkoh.latammod.init.block.XboxBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -19,6 +20,8 @@ public class MainBlocks {
 	// Bloque ejemplo :P
 	public static final RegistryObject<Block> PAPUBLOQUE = registerBlock("papubloque",
 			() -> new Block(Block.Properties.copy(Blocks.DIAMOND_BLOCK)));
+	public static final RegistryObject<Block> XboxBlock = registerBlock("xboxblock",
+			() -> new XboxBlock(Block.Properties.copy(Blocks.DIAMOND_BLOCK)));
 
 	private static RegistryObject<Block> registerBlock(String name, Supplier<Block> supplier) {
 		RegistryObject<Block> registeredObject = BLOCKS.register(name, supplier);

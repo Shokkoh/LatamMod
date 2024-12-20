@@ -31,6 +31,7 @@ public class LatBlockLootTables extends BlockLootSubProvider {
 	protected void generate () {
 		// Bloques que se dropean a sí mismos
 		this.dropSelf(MainBlocks.PAPUBLOQUE.get());
+		this.dropSelf(MainBlocks.XboxBlock.get());
 
 		// Bloques que dropean otros items
 		//this.add(MainBlocks.NAMEK_DIAMOND_ORE.get(),

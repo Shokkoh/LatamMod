@@ -1,6 +1,7 @@
 package com.shokkoh.latammod.datagen;
 
 import com.shokkoh.latammod.LatamMod;
+import com.shokkoh.latammod.init.MainBlocks;
 import com.shokkoh.latammod.init.MainItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ public class LatItemModelProvider extends ItemModelProvider {
 	@Override
 	protected void registerModels() {
 		simpleItem(MainItems.HOLAXD);
+		blockItem(MainBlocks.XboxBlock);
 	}
 
 	private ItemModelBuilder simpleItem(RegistryObject<Item> item) {
