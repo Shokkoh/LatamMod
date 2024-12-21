@@ -21,6 +21,8 @@ public class LatItemModelProvider extends ItemModelProvider {
 	@Override
 	protected void registerModels() {
 		simpleItem(MainItems.HOLAXD);
+		simpleItem(MainItems.ALFALFA);
+
 		blockItem(MainBlocks.XboxBlock);
 	}
 

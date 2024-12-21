@@ -2,6 +2,7 @@ package com.shokkoh.latammod.init;
 
 import com.shokkoh.latammod.LatamMod;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -14,6 +15,7 @@ public class MainItems {
 
 	// Item ejemplo
 	public static final RegistryObject<Item> HOLAXD = regItem("holaxd");
+	public static final RegistryObject<Item> ALFALFA = regItem("alfalfa");
 
 	public static RegistryObject<Item> regItem(String name) {
 		return ITEMS.register(name, () -> new Item(properties.stacksTo(64)));

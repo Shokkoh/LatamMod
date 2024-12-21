@@ -1,7 +1,10 @@
 {
   "blocks.latammod.papubloque": "Papu Bloque",
 
-  "items.latammod.holaxd": "Hola xd",
+  "item.latammod.holaxd": "Hola xd",
+  "item.latammod.alfalfa": "Alfalfa",
 
-  "entity.latammod.thiago": "Thiago el Duende"
+  "entity.latammod.thiago": "Thiago el Duende",
+  "entity.latammod.cuy": "Cuy"
+
 }
